@@ -8,6 +8,8 @@ set(VERSION "1.2.11")
 option(ASM686 "Enable building i686 assembly implementation")
 option(AMD64 "Enable building amd64 assembly implementation")
 
+option(MSVC_STATIC_LIB "Use static MSVC runtime library" OFF)
+
 set(INSTALL_BIN_DIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Installation directory for executables")
 set(INSTALL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib" CACHE PATH "Installation directory for libraries")
 set(INSTALL_INC_DIR "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH "Installation directory for headers")
@@ -64,6 +66,17 @@ if(MSVC)
     add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
     add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+    if(MSVC_STATIC_LIB)
+        add_compile_options($<$<CONFIG:Release>:/MT> # Runtime library: Multi-threaded
+                        $<$<CONFIG:RelWithDebInfo>:/MT> # Runtime library: Multi-threaded                           
+                        $<$<CONFIG:Debug>:/MTd> # Runtime library: Multi-threaded Debug
+                        )
+    else()
+        add_compile_options($<$<CONFIG:Release>:/MD> # Runtime library: Multi-threaded DLL
+                        $<$<CONFIG:RelWithDebInfo>:/MD> # Runtime library: Multi-threaded DLL                          
+                        $<$<CONFIG:Debug>:/MDd> # Runtime library: Multi-threaded Debug DLL
+                        )
+    endif()
 endif()
 
 if(NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
